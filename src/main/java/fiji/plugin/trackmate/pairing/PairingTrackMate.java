@@ -16,6 +16,17 @@ import fiji.plugin.trackmate.pairing.Pairing.Builder;
 import fiji.plugin.trackmate.pairing.Pairing.SpotPair;
 import net.imglib2.algorithm.OutputAlgorithm;
 
+/**
+ * Pair two models based on the max distance.
+ * <p>
+ * This algorithm loads two TrackMate files and pair the tracks they contain
+ * based on the how many spots in common frames are within a specified maximum
+ * pairing distance. A track pair is the pair for which this number of common
+ * spots is the highest.
+ * 
+ * @author Jean-Yves Tinevez
+ *
+ */
 public class PairingTrackMate implements OutputAlgorithm< Pairing >
 {
 
