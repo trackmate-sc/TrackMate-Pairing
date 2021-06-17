@@ -96,7 +96,7 @@ public class PairingPreviewCreator
 				overlay.add( roi1 );
 				overlay.add( roi2 );
 				overlay.add( lineBetween( roi1, roi2, color, group ) );
-				overlay.add( annotate( trackPair.id1 + "&" + trackPair.id2, roi1, roi2, color, group ) );
+				overlay.add( annotate( trackPair.getName(), roi1, roi2, color, group ) );
 			}
 		}
 	}
