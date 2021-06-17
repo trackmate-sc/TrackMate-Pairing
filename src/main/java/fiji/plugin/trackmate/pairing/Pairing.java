@@ -3,7 +3,9 @@ package fiji.plugin.trackmate.pairing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
@@ -29,15 +31,23 @@ public class Pairing
 		{
 			this.id1 = id1;
 			this.id2 = id2;
-			this.paired = Collections.unmodifiableCollection( paired );
+			// Sort by time.
+			final List< SpotPair > list = new ArrayList<>( paired );
+			list.sort( Comparator.comparingInt( p -> p.s1.getFeature( Spot.FRAME ).intValue() ) );
+			this.paired = Collections.unmodifiableCollection( list );
 		}
 
 		public double meanDistance()
 		{
 			return paired.stream()
-					.mapToDouble( p -> Math.sqrt( p.s1.squareDistanceTo( p.s2 ) ) )
+					.mapToDouble( SpotPair::distance )
 					.summaryStatistics()
 					.getAverage();
+		}
+
+		public String getName()
+		{
+			return id1 + "&" + id2;
 		}
 	}
 
@@ -57,6 +67,11 @@ public class Pairing
 		public String toString()
 		{
 			return s1.ID() + "-" + s2.ID();
+		}
+
+		public double distance()
+		{
+			return Math.sqrt( s1.squareDistanceTo( s2 ) );
 		}
 	}
 
@@ -78,6 +93,47 @@ public class Pairing
 		this.unmatchedTracks1 = unmatchedTracks1;
 		this.unmatchedTracks2 = unmatchedTracks2;
 		this.units = units;
+	}
+
+	public List< String[] > toCsv()
+	{
+		final List< String[] > strs = new ArrayList<>();
+		// Header.
+		final String[] header = new String[] {
+				"Track_pair",
+				"Track_1_id",
+				"Track_1_id",
+				"Frame",
+				"Spot_1_X",
+				"Spot_1_Y",
+				"Spot_1_Z",
+				"Spot_2_X",
+				"Spot_2_Y",
+				"Spot_2_Z",
+				"Distance"
+		};
+		strs.add( header );
+		for ( final TrackPair trackPair : pairs )
+		{
+			for ( final SpotPair pair : trackPair.paired )
+			{
+				final String[] str = new String[] {
+						trackPair.getName(),
+						trackPair.id1.toString(),
+						trackPair.id2.toString(),
+						"" + pair.s1.getFeature( Spot.FRAME ).intValue(),
+						Double.toString( pair.s1.getDoublePosition( 0 ) ),
+						Double.toString( pair.s1.getDoublePosition( 1 ) ),
+						Double.toString( pair.s1.getDoublePosition( 2 ) ),
+						Double.toString( pair.s2.getDoublePosition( 0 ) ),
+						Double.toString( pair.s2.getDoublePosition( 1 ) ),
+						Double.toString( pair.s2.getDoublePosition( 2 ) ),
+						Double.toString( pair.distance() )
+				};
+				strs.add( str );
+			}
+		}
+		return strs;
 	}
 
 	@Override
