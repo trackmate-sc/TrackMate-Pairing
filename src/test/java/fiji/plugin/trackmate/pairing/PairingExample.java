@@ -1,10 +1,19 @@
 package fiji.plugin.trackmate.pairing;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import ij.ImageJ;
+import ij.ImagePlus;
+
 public class PairingExample
 {
 
-	public static void main( final String[] args )
+	public static void main( final String[] args ) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
 	{
+		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+		ImageJ.main( args );
+
 		final String xml1 = "samples/1.5x-timelqpe_2021-04-02_c1.xml";
 		final String xml2 = "samples/1.5x-timelqpe_2021-04-02_c2.xml";
 
@@ -16,8 +25,13 @@ public class PairingExample
 			System.err.println( pairing.getErrorMessage() );
 			return;
 		}
-		System.out.println( "Finished!" );
+		System.out.println( "Pairing finished!" );
 		System.out.println( pairing.getResult() );
-	}
 
+		System.out.println( "Generating preview image." );
+		final ImagePlus imp = PairingPreviewCreator.openImage( xml1 );
+		final ImagePlus output = PairingPreviewCreator.preview2D( pairing.getResult(), imp );
+		output.show();
+		System.out.println( "Preview finished!" );
+	}
 }
