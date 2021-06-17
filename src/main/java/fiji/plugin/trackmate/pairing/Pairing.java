@@ -3,6 +3,8 @@ package fiji.plugin.trackmate.pairing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
 
@@ -60,16 +62,16 @@ public class Pairing
 
 	public final Collection< TrackPair > pairs;
 
-	public final Collection< Integer > unmatchedTracks1;
+	public final Map< Integer, Collection< Spot > > unmatchedTracks1;
 
-	public final Collection< Integer > unmatchedTracks2;
+	public final Map< Integer, Collection< Spot > > unmatchedTracks2;
 
 	private final String units;
 
 	private Pairing(
 			final Collection< TrackPair > pairs,
-			final Collection< Integer > unmatchedTracks1,
-			final Collection< Integer > unmatchedTracks2,
+			final Map< Integer, Collection< Spot > > unmatchedTracks1,
+			final Map< Integer, Collection< Spot > > unmatchedTracks2,
 			final String units )
 	{
 		this.pairs = pairs;
@@ -103,7 +105,7 @@ public class Pairing
 		else
 		{
 			str.append( "\nUnmatched tracks 1:" );
-			for ( final Integer id1 : unmatchedTracks1 )
+			for ( final Integer id1 : unmatchedTracks1.keySet() )
 				str.append( "\n - " + id1 );
 		}
 		if ( unmatchedTracks2.isEmpty() )
@@ -113,7 +115,7 @@ public class Pairing
 		else
 		{
 			str.append( "\nUnmatched tracks 2:" );
-			for ( final Integer id2 : unmatchedTracks2 )
+			for ( final Integer id2 : unmatchedTracks2.keySet() )
 				str.append( "\n - " + id2 );
 		}
 		return str.toString();
@@ -132,9 +134,9 @@ public class Pairing
 	{
 		private final Collection< TrackPair > pairs = new ArrayList<>();
 
-		private final Collection< Integer > unmatchedTracks1 = new ArrayList<>();
+		private final Map< Integer, Collection< Spot > > unmatchedTracks1 = new HashMap<>();
 
-		private final Collection< Integer > unmatchedTracks2 = new ArrayList<>();
+		private final Map< Integer, Collection< Spot > > unmatchedTracks2 = new HashMap<>();
 
 		private String units = "";
 
@@ -156,19 +158,19 @@ public class Pairing
 			return this;
 		}
 
-		public Builder unmatchedTrack1( final Integer id1 )
+		public Builder unmatchedTrack1( final Integer id1, final Collection< Spot > track1 )
 		{
 			if ( id1 == null )
 				throw new IllegalArgumentException( "Id1 is null." );
-			unmatchedTracks1.add( id1 );
+			unmatchedTracks1.put( id1, track1 );
 			return this;
 		}
 
-		public Builder unmatchedTrack2( final Integer id2 )
+		public Builder unmatchedTrack2( final Integer id2, final Collection< Spot > track2 )
 		{
 			if ( id2 == null )
 				throw new IllegalArgumentException( "Id2 is null." );
-			unmatchedTracks2.add( id2 );
+			unmatchedTracks2.put( id2, track2 );
 			return this;
 		}
 
@@ -176,8 +178,8 @@ public class Pairing
 		{
 			return new Pairing(
 					Collections.unmodifiableCollection( pairs ),
-					Collections.unmodifiableCollection( unmatchedTracks1 ),
-					Collections.unmodifiableCollection( unmatchedTracks2 ),
+					Collections.unmodifiableMap( unmatchedTracks1 ),
+					Collections.unmodifiableMap( unmatchedTracks2 ),
 					units );
 		}
 	}

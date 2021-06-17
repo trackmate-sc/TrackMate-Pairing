@@ -157,12 +157,15 @@ public class PairingTrackMate implements OutputAlgorithm< Pairing >
 			}
 			else
 			{
-				builder.unmatchedTrack1( id1 );
+				builder.unmatchedTrack1( id1, track1 );
 			}
 		}
 		// Add the remaining track2 to unmatched list.
 		for ( final Integer id2 : ids2 )
-			builder.unmatchedTrack2( id2 );
+		{
+			final Set< Spot > track2 = tm2.trackSpots( id2 );
+			builder.unmatchedTrack2( id2, track2 );
+		}
 
 		output = builder.get();
 		return true;
