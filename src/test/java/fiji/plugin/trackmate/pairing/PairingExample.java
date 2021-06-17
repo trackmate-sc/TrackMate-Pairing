@@ -1,7 +1,14 @@
 package fiji.plugin.trackmate.pairing;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVWriter;
 
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -33,5 +40,17 @@ public class PairingExample
 		final ImagePlus output = PairingPreviewCreator.preview2D( pairing.getResult(), imp );
 		output.show();
 		System.out.println( "Preview finished!" );
+
+		System.out.println( "Writing to CSV file." );
+		try (final ICSVWriter writer = new CSVWriterBuilder(
+				new FileWriter( new File( "samples/1.5x-timelqpe_2021-04-02.csv" ) ) ).withSeparator( ',' ).build())
+		{
+			writer.writeAll( pairing.getResult().toCsv() );
+		}
+		catch ( final IOException e )
+		{
+			e.printStackTrace();
+		}
+		System.out.println( "Done!" );
 	}
 }
