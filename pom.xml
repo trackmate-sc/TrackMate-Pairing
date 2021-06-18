@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>Pairing-TrackMate</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 
 	<name>Pairing-TrackMate</name>
 	<description>A Fiji plugin to pair two TrackMate files and extract statistics from pairs.</description>
@@ -61,7 +61,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/tinevez/TrackMate-Ilastik</connection>
 		<developerConnection>scm:git:git@github.com:tinevez/TrackMate-Ilastik</developerConnection>
-		<tag>HEAD</tag>
+		<tag>Pairing-TrackMate-1.0.1</tag>
 		<url>https://github.com/tinevez/</url>
 	</scm>
 	<issueManagement>
