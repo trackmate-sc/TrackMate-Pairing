@@ -106,9 +106,18 @@ public class PairingTrackMateController
 
 		IJ.log( "Generating preview image." );
 		final ImagePlus imp = PairingPreviewCreator.openImage( path1 );
-		final ImagePlus output = PairingPreviewCreator.preview2D( pairing.getResult(), imp );
-		output.show();
-		IJ.log( "Preview finished!" );
+		if ( imp == null )
+		{
+			IJ.log( "Could not open image referenced in the the first TrackMate file.\n"
+					+ "Preview image won't be generated.\n"
+					+ "Did you resave the image as ImageJ tif before running TrackMate?" );
+		}
+		else
+		{
+			final ImagePlus output = PairingPreviewCreator.preview2D( pairing.getResult(), imp );
+			output.show();
+			IJ.log( "Preview finished!" );
+		}
 
 		/*
 		 * Build CSV path.
