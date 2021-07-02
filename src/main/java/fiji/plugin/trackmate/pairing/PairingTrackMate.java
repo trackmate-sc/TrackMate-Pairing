@@ -21,6 +21,11 @@
  */
 package fiji.plugin.trackmate.pairing;
 
+import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.TmXmlKeys.SETTINGS_ELEMENT_KEY;
+
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -28,6 +33,10 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -187,6 +196,10 @@ public class PairingTrackMate implements OutputAlgorithm< Pairing >
 			final Set< Spot > track2 = tm2.trackSpots( id2 );
 			builder.unmatchedTrack2( id2, track2 );
 		}
+		
+		// Add the path to the source image.
+		final String sourceImagePath = readImagePath( xml1 );
+		builder.sourceImagePath( sourceImagePath );
 
 		output = builder.get();
 		return true;
@@ -211,6 +224,26 @@ public class PairingTrackMate implements OutputAlgorithm< Pairing >
 			}
 		}
 		return commons;
+	}
+
+	private String readImagePath( final String path )
+	{
+		final SAXBuilder sb = new SAXBuilder();
+		try
+		{
+			final Document document = sb.build( new File( path ) );
+			final Element root = document.getRootElement();
+			final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
+			if ( null == settingsElement )
+				return null;
+			final Element imageInfoElement = settingsElement.getChild( IMAGE_ELEMENT_KEY );
+			final String filename = imageInfoElement.getAttributeValue( IMAGE_FILENAME_ATTRIBUTE_NAME );
+			final String folder = imageInfoElement.getAttributeValue( IMAGE_FOLDER_ATTRIBUTE_NAME );
+			return folder + filename;
+		}
+		catch ( final Exception e )
+		{}
+		return null;
 	}
 
 	private Model readModel( final String path )

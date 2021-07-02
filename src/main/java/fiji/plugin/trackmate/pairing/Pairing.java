@@ -104,16 +104,20 @@ public class Pairing
 
 	private final String units;
 
+	private final String sourceImagePath;
+
 	private Pairing(
 			final Collection< TrackPair > pairs,
 			final Map< Integer, Collection< Spot > > unmatchedTracks1,
 			final Map< Integer, Collection< Spot > > unmatchedTracks2,
-			final String units )
+			final String units,
+			final String sourceImagePath )
 	{
 		this.pairs = pairs;
 		this.unmatchedTracks1 = unmatchedTracks1;
 		this.unmatchedTracks2 = unmatchedTracks2;
 		this.units = units;
+		this.sourceImagePath = sourceImagePath;
 	}
 
 	public List< String[] > toCsv()
@@ -131,7 +135,8 @@ public class Pairing
 				"Spot_2_X",
 				"Spot_2_Y",
 				"Spot_2_Z",
-				"Distance"
+				"Distance",
+				"Source_Image"
 		};
 		strs.add( header );
 		for ( final TrackPair trackPair : pairs )
@@ -149,7 +154,8 @@ public class Pairing
 						Double.toString( pair.s2.getDoublePosition( 0 ) ),
 						Double.toString( pair.s2.getDoublePosition( 1 ) ),
 						Double.toString( pair.s2.getDoublePosition( 2 ) ),
-						Double.toString( pair.distance() )
+						Double.toString( pair.distance() ),
+						sourceImagePath
 				};
 				strs.add( str );
 			}
@@ -217,6 +223,8 @@ public class Pairing
 
 		private String units = "";
 
+		private String sourceImagePath;
+
 		public Builder units( final String units )
 		{
 			this.units = units;
@@ -251,13 +259,20 @@ public class Pairing
 			return this;
 		}
 
+		public Builder sourceImagePath( final String sourceImagePath )
+		{
+			this.sourceImagePath = sourceImagePath;
+			return this;
+		}
+
 		public Pairing get()
 		{
 			return new Pairing(
 					Collections.unmodifiableCollection( pairs ),
 					Collections.unmodifiableMap( unmatchedTracks1 ),
 					Collections.unmodifiableMap( unmatchedTracks2 ),
-					units );
+					units,
+					sourceImagePath );
 		}
 	}
 }
