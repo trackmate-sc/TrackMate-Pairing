@@ -102,7 +102,7 @@ public class Pairing
 
 	public final Map< Integer, Collection< Spot > > unmatchedTracks2;
 
-	private final String units;
+	public final String units;
 
 	private final String sourceImagePath;
 
