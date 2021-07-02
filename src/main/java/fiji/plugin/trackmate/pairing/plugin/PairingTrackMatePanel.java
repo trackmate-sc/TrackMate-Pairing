@@ -33,6 +33,8 @@ import java.awt.event.FocusListener;
 import java.io.File;
 import java.text.DecimalFormat;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -50,6 +52,7 @@ import org.scijava.util.VersionUtils;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.gui.Fonts;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.pairing.PairingTrackMate;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -66,6 +69,8 @@ public class PairingTrackMatePanel extends JPanel
 	final JTextField tf2;
 
 	final JButton btnPair;
+
+	final JButton btnPreview;
 
 	final JFormattedTextField ftfMaxDist;
 
@@ -88,7 +93,7 @@ public class PairingTrackMatePanel extends JPanel
 		lblTitle.setHorizontalAlignment( SwingConstants.CENTER );
 		final GridBagConstraints gbcLblTitle = new GridBagConstraints();
 		gbcLblTitle.gridwidth = 3;
-		gbcLblTitle.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblTitle.insets = new Insets( 5, 5, 5, 0 );
 		gbcLblTitle.fill = GridBagConstraints.HORIZONTAL;
 		gbcLblTitle.gridx = 0;
 		gbcLblTitle.gridy = 0;
@@ -107,7 +112,7 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcBtnBrowse1 = new GridBagConstraints();
 		gbcBtnBrowse1.gridwidth = 2;
 		gbcBtnBrowse1.anchor = GridBagConstraints.SOUTHEAST;
-		gbcBtnBrowse1.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnBrowse1.insets = new Insets( 5, 5, 0, 5 );
 		gbcBtnBrowse1.gridx = 1;
 		gbcBtnBrowse1.gridy = 2;
 		add( btnBrowse1, gbcBtnBrowse1 );
@@ -136,7 +141,7 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcBtnBrowse2 = new GridBagConstraints();
 		gbcBtnBrowse2.gridwidth = 2;
 		gbcBtnBrowse2.anchor = GridBagConstraints.SOUTHEAST;
-		gbcBtnBrowse2.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnBrowse2.insets = new Insets( 5, 5, 0, 5 );
 		gbcBtnBrowse2.gridx = 1;
 		gbcBtnBrowse2.gridy = 4;
 		add( btnBrowse2, gbcBtnBrowse2 );
@@ -144,7 +149,7 @@ public class PairingTrackMatePanel extends JPanel
 		tf2 = new JTextField();
 		tf2.setText( prefService.get( PairingTrackMate.class, "Path2", System.getProperty( "user.home" ) ) );
 		final GridBagConstraints gbcTf2 = new GridBagConstraints();
-		gbcTf2.insets = new Insets( 5, 5, 0, 5 );
+		gbcTf2.insets = new Insets( 0, 5, 5, 5 );
 		gbcTf2.gridwidth = 3;
 		gbcTf2.fill = GridBagConstraints.HORIZONTAL;
 		gbcTf2.gridx = 0;
@@ -154,7 +159,7 @@ public class PairingTrackMatePanel extends JPanel
 
 		final JLabel lblMaxPairingDistance = new JLabel( "MaxPairing Distance:" );
 		final GridBagConstraints gbcLblMaxPairingDistance = new GridBagConstraints();
-		gbcLblMaxPairingDistance.anchor = GridBagConstraints.SOUTHEAST;
+		gbcLblMaxPairingDistance.anchor = GridBagConstraints.EAST;
 		gbcLblMaxPairingDistance.insets = new Insets( 5, 5, 5, 5 );
 		gbcLblMaxPairingDistance.gridx = 0;
 		gbcLblMaxPairingDistance.gridy = 6;
@@ -165,8 +170,7 @@ public class PairingTrackMatePanel extends JPanel
 		ftfMaxDist.setHorizontalAlignment( SwingConstants.CENTER );
 		GuiUtils.selectAllOnFocus( ftfMaxDist );
 		final GridBagConstraints gbcFtfMaxDist = new GridBagConstraints();
-		gbcFtfMaxDist.anchor = GridBagConstraints.SOUTH;
-		gbcFtfMaxDist.insets = new Insets( 5, 5, 0, 0 );
+		gbcFtfMaxDist.insets = new Insets( 5, 5, 5, 5 );
 		gbcFtfMaxDist.fill = GridBagConstraints.HORIZONTAL;
 		gbcFtfMaxDist.gridx = 1;
 		gbcFtfMaxDist.gridy = 6;
@@ -174,21 +178,29 @@ public class PairingTrackMatePanel extends JPanel
 
 		lblUnits = new JLabel( "pixels" );
 		final GridBagConstraints gbc_lblUnits = new GridBagConstraints();
-		gbc_lblUnits.anchor = GridBagConstraints.SOUTH;
 		gbc_lblUnits.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblUnits.insets = new Insets( 5, 0, 5, 5 );
 		gbc_lblUnits.gridx = 2;
 		gbc_lblUnits.gridy = 6;
 		add( lblUnits, gbc_lblUnits );
 
+
+		final JPanel panelButtons = new JPanel();
+		panelButtons.setLayout( new BoxLayout( panelButtons, BoxLayout.LINE_AXIS ) );
+		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
+		gbcPanelButtons.anchor = GridBagConstraints.SOUTH;
+		gbcPanelButtons.gridwidth = 3;
+		gbcPanelButtons.insets = new Insets( 5, 5, 0, 0 );
+		gbcPanelButtons.fill = GridBagConstraints.HORIZONTAL;
+		gbcPanelButtons.gridx = 0;
+		gbcPanelButtons.gridy = 8;
+		add( panelButtons, gbcPanelButtons );
+
 		btnPair = new JButton( "Pair" );
-		final GridBagConstraints gbc_btnPair = new GridBagConstraints();
-		gbc_btnPair.gridwidth = 3;
-		gbc_btnPair.anchor = GridBagConstraints.EAST;
-		gbc_btnPair.insets = new Insets( 5, 5, 5, 5 );
-		gbc_btnPair.gridx = 0;
-		gbc_btnPair.gridy = 8;
-		add( btnPair, gbc_btnPair );
+		btnPreview = new JButton( "Preview", Icons.PREVIEW_ICON );
+		panelButtons.add( btnPreview );
+		panelButtons.add( Box.createHorizontalGlue() );
+		panelButtons.add( btnPair );
 
 		/*
 		 * Listeners.

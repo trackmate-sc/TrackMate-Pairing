@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.pairing.plugin;
 
+import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.FileWriter;
@@ -30,14 +31,30 @@ import java.nio.file.Paths;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.statistics.HistogramDataset;
+import org.scijava.util.DoubleArray;
 
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 
 import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.pairing.Pairing;
+import fiji.plugin.trackmate.pairing.Pairing.SpotPair;
+import fiji.plugin.trackmate.pairing.Pairing.TrackPair;
 import fiji.plugin.trackmate.pairing.PairingPreviewCreator;
 import fiji.plugin.trackmate.pairing.PairingTrackMate;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
+import fiji.plugin.trackmate.util.ExportableChartPanel;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -67,6 +84,22 @@ public class PairingTrackMateController
 					reenabler.reenable();
 				}
 			} ).start() );
+			gui.btnPreview.addActionListener( e -> new Thread( () -> {
+
+				final EverythingDisablerAndReenabler reenabler = new EverythingDisablerAndReenabler( gui, new Class[] { JLabel.class } );
+				try
+				{
+					reenabler.disable();
+					preview(
+							gui.tf1.getText(),
+							gui.tf2.getText(),
+							( ( Number ) gui.ftfMaxDist.getValue() ).doubleValue() );
+				}
+				finally
+				{
+					reenabler.reenable();
+				}
+			} ).start() );
 			final JFrame frame = new JFrame( "Pairing TrackMate" );
 			frame.setIconImage( Icons.TRACKMATE_ICON.getImage() );
 			frame.getContentPane().add( gui );
@@ -82,6 +115,87 @@ public class PairingTrackMateController
 			} );
 			frame.setVisible( true );
 		}
+	}
+
+	private void preview( final String path1, final String path2, final double maxPairDistance )
+	{
+		IJ.log( "Pairing " + path1 + " and " + path2 );
+		final PairingTrackMate pairing = new PairingTrackMate( path1, path2, maxPairDistance );
+		if ( !pairing.checkInput() || !pairing.process() )
+		{
+			IJ.error( "Pairing TrackMate", "Problem pairing the files:\n" + pairing.getErrorMessage() );
+			return;
+		}
+		IJ.log( "Pairing finished!" );
+		IJ.log( pairing.getResult().toString() );
+
+		/*
+		 * Compute distance histogram.
+		 */
+
+		final Pairing result = pairing.getResult();
+		final DoubleArray arr = new DoubleArray();
+		for ( final TrackPair trackpair : result.pairs )
+		{
+			for ( final SpotPair pair : trackpair.paired )
+				arr.addValue( pair.distance() );
+		}
+		final HistogramDataset dataset = new HistogramDataset();
+		final double[] distances = arr.copyArray();
+		final int nBins = TMUtils.getNBins( distances, 8, 100 );
+		dataset.addSeries( "Paired distances", distances, nBins );
+
+		/*
+		 * Create histogram plot.
+		 */
+
+		final String xlabel = "Pair distance (" + result.units + ")";
+		final String ylabel = "#";
+		final String title = "Pair distance histogram";
+		final JFreeChart chart = ChartFactory.createHistogram( title, xlabel, ylabel, dataset, PlotOrientation.VERTICAL, false, false, false );
+
+		final XYPlot plot = chart.getXYPlot();
+		final XYBarRenderer renderer = ( XYBarRenderer ) plot.getRenderer();
+		renderer.setShadowVisible( false );
+		renderer.setMargin( 0 );
+		renderer.setBarPainter( new StandardXYBarPainter() );
+		renderer.setDrawBarOutline( true );
+		renderer.setSeriesOutlinePaint( 0, new Color( 0.2f, 0.2f, 0.2f ) );
+		renderer.setSeriesPaint( 0, new Color( 0.3f, 0.3f, 0.3f, 0.5f ) );
+
+		plot.setBackgroundPaint( new Color( 1, 1, 1, 0 ) );
+		plot.setOutlineVisible( false );
+		plot.setDomainCrosshairVisible( false );
+		plot.setDomainGridlinesVisible( false );
+		plot.setRangeCrosshairVisible( false );
+		plot.setRangeGridlinesVisible( false );
+
+		plot.getRangeAxis().setTickLabelInsets( new RectangleInsets( 20, 10, 20, 10 ) );
+		plot.getDomainAxis().setTickLabelInsets( new RectangleInsets( 10, 20, 10, 20 ) );
+
+		chart.setBorderVisible( false );
+		chart.setBackgroundPaint( new Color( 0.6f, 0.6f, 0.7f ) );
+
+		final ExportableChartPanel chartPanel = new ExportableChartPanel( chart )
+		{
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected JPopupMenu createPopupMenu( final boolean properties, final boolean copy, final boolean save, final boolean print, final boolean zoom )
+			{
+				final JPopupMenu menu = super.createPopupMenu( properties, copy, false, print, zoom );
+				menu.remove( 11 );
+				return menu;
+			}
+		};
+		chartPanel.setPreferredSize( new java.awt.Dimension( 500, 270 ) );
+		chartPanel.setOpaque( false );
+
+		final JFrame frame = new JFrame( title );
+		frame.getContentPane().add( chartPanel );
+		frame.pack();
+		frame.setLocationRelativeTo( gui );
+		frame.setVisible( true );
 	}
 
 	public void pair( final String path1, final String path2, final double maxPairDistance )
