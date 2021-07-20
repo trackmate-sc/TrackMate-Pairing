@@ -41,20 +41,16 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.statistics.HistogramDataset;
-import org.scijava.util.DoubleArray;
 
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.pairing.Pairing;
-import fiji.plugin.trackmate.pairing.Pairing.SpotPair;
-import fiji.plugin.trackmate.pairing.Pairing.TrackPair;
+import fiji.plugin.trackmate.pairing.PairingHistogram;
 import fiji.plugin.trackmate.pairing.PairingPreviewCreator;
 import fiji.plugin.trackmate.pairing.PairingTrackMate;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -92,8 +88,7 @@ public class PairingTrackMateController
 					reenabler.disable();
 					preview(
 							gui.tf1.getText(),
-							gui.tf2.getText(),
-							( ( Number ) gui.ftfMaxDist.getValue() ).doubleValue() );
+							gui.tf2.getText() );
 				}
 				finally
 				{
@@ -117,39 +112,29 @@ public class PairingTrackMateController
 		}
 	}
 
-	private void preview( final String path1, final String path2, final double maxPairDistance )
+	private void preview( final String path1, final String path2 )
 	{
-		IJ.log( "Pairing " + path1 + " and " + path2 );
-		final PairingTrackMate pairing = new PairingTrackMate( path1, path2, maxPairDistance );
-		if ( !pairing.checkInput() || !pairing.process() )
-		{
-			IJ.error( "Pairing TrackMate", "Problem pairing the files:\n" + pairing.getErrorMessage() );
-			return;
-		}
-		IJ.log( "Pairing finished!" );
-		IJ.log( pairing.getResult().toString() );
-
 		/*
 		 * Compute distance histogram.
 		 */
 
-		final Pairing result = pairing.getResult();
-		final DoubleArray arr = new DoubleArray();
-		for ( final TrackPair trackpair : result.pairs )
+		IJ.log( "Creating distance histogram for " + path1 + " and " + path2 );
+		final PairingHistogram histo = new PairingHistogram( path1, path2 );
+		if ( !histo.checkInput() || !histo.process() )
 		{
-			for ( final SpotPair pair : trackpair.paired )
-				arr.addValue( pair.distance() );
+			IJ.error( "Pairing histogram", "Problem with the files:\n" + histo.getErrorMessage() );
+			return;
 		}
-		final HistogramDataset dataset = new HistogramDataset();
-		final double[] distances = arr.copyArray();
-		final int nBins = TMUtils.getNBins( distances, 8, 100 );
-		dataset.addSeries( "Paired distances", distances, nBins );
+		IJ.log( "Histogram measured." );
+		IJ.log( histo.getResult().toString() );
+		final HistogramDataset dataset = histo.getResult();
 
 		/*
 		 * Create histogram plot.
 		 */
 
-		final String xlabel = "Pair distance (" + result.units + ")";
+		final String units = histo.getUnits();
+		final String xlabel = "Pair distance (" + units + ")";
 		final String ylabel = "#";
 		final String title = "Pair distance histogram";
 		final JFreeChart chart = ChartFactory.createHistogram( title, xlabel, ylabel, dataset, PlotOrientation.VERTICAL, false, false, false );
