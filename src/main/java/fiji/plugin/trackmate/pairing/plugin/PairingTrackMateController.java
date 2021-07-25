@@ -21,6 +21,7 @@
  */
 package fiji.plugin.trackmate.pairing.plugin;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.io.File;
@@ -37,16 +38,15 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYBarPainter;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleInsets;
-import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.DefaultXYDataset;
 
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.pairing.PairingHistogram;
+import fiji.plugin.trackmate.pairing.PairingCumulativeHistogram;
 import fiji.plugin.trackmate.pairing.PairingPreviewCreator;
 import fiji.plugin.trackmate.pairing.PairingTrackMate;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
@@ -118,8 +118,8 @@ public class PairingTrackMateController
 		 * Compute distance histogram.
 		 */
 
-		IJ.log( "Creating distance histogram for " + path1 + " and " + path2 );
-		final PairingHistogram histo = new PairingHistogram( path1, path2 );
+		IJ.log( "Creating distance cumulative histogram for " + path1 + " and " + path2 );
+		final PairingCumulativeHistogram histo = new PairingCumulativeHistogram( path1, path2 );
 		if ( !histo.checkInput() || !histo.process() )
 		{
 			IJ.error( "Pairing histogram", "Problem with the files:\n" + histo.getErrorMessage() );
@@ -127,7 +127,7 @@ public class PairingTrackMateController
 		}
 		IJ.log( "Histogram measured." );
 		IJ.log( histo.getResult().toString() );
-		final HistogramDataset dataset = histo.getResult();
+		final DefaultXYDataset dataset = histo.getResult();
 
 		/*
 		 * Create histogram plot.
@@ -135,18 +135,16 @@ public class PairingTrackMateController
 
 		final String units = histo.getUnits();
 		final String xlabel = "Pair distance (" + units + ")";
-		final String ylabel = "#";
-		final String title = "Pair distance histogram";
-		final JFreeChart chart = ChartFactory.createHistogram( title, xlabel, ylabel, dataset, PlotOrientation.VERTICAL, false, false, false );
+		final String ylabel = "cdf";
+		final String title = "Pair distance cumulative histogram";
+		final JFreeChart chart = ChartFactory.createXYLineChart(
+				title, xlabel, ylabel, dataset, PlotOrientation.VERTICAL, false, false, false );
 
 		final XYPlot plot = chart.getXYPlot();
-		final XYBarRenderer renderer = ( XYBarRenderer ) plot.getRenderer();
-		renderer.setShadowVisible( false );
-		renderer.setMargin( 0 );
-		renderer.setBarPainter( new StandardXYBarPainter() );
-		renderer.setDrawBarOutline( true );
+		final XYLineAndShapeRenderer renderer = ( XYLineAndShapeRenderer ) plot.getRenderer();
 		renderer.setSeriesOutlinePaint( 0, new Color( 0.2f, 0.2f, 0.2f ) );
 		renderer.setSeriesPaint( 0, new Color( 0.3f, 0.3f, 0.3f, 0.5f ) );
+		renderer.setSeriesStroke( 0, new BasicStroke( 2f ) );
 
 		plot.setBackgroundPaint( new Color( 1, 1, 1, 0 ) );
 		plot.setOutlineVisible( false );
@@ -159,7 +157,7 @@ public class PairingTrackMateController
 		plot.getDomainAxis().setTickLabelInsets( new RectangleInsets( 10, 20, 10, 20 ) );
 
 		chart.setBorderVisible( false );
-		chart.setBackgroundPaint( new Color( 0.6f, 0.6f, 0.7f ) );
+		chart.setBackgroundPaint( new Color( 0.8f, 0.8f, 0.9f ) );
 
 		final ExportableChartPanel chartPanel = new ExportableChartPanel( chart )
 		{
@@ -173,7 +171,7 @@ public class PairingTrackMateController
 				return menu;
 			}
 		};
-		chartPanel.setPreferredSize( new java.awt.Dimension( 500, 270 ) );
+		chartPanel.setPreferredSize( new java.awt.Dimension( 500, 520 ) );
 		chartPanel.setOpaque( false );
 
 		final JFrame frame = new JFrame( title );
