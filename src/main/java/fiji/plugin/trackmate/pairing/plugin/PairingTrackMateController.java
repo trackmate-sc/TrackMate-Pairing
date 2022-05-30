@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -53,6 +54,8 @@ import fiji.plugin.trackmate.pairing.method.PairingMethod;
 import fiji.plugin.trackmate.pairing.method.PairingMethods;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
+import fiji.plugin.trackmate.util.FileChooser;
+import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -230,12 +233,28 @@ public class PairingTrackMateController
 		final File csvFile = Paths.get( parent.toString(), prefix + ".csv" ).toFile();
 
 		/*
+		 * Ask for where to save.
+		 */
+
+		final File choosenFile = FileChooser.chooseFile(
+				gui,
+				csvFile.getAbsolutePath(),
+				new FileNameExtensionFilter( "CSV files", "csv", "CSV" ),
+				"Save pairing results to CSV file",
+				DialogType.SAVE );
+		if ( choosenFile == null )
+		{
+			IJ.log( "Saving aborted." );
+			return;
+		}
+
+		/*
 		 * Write to CSV.
 		 */
 
-		IJ.log( "Writing to CSV file: " + csvFile );
+		IJ.log( "Writing to CSV file: " + choosenFile );
 		try (final ICSVWriter writer = new CSVWriterBuilder(
-				new FileWriter( csvFile ) ).withSeparator( ',' ).build())
+				new FileWriter( choosenFile ) ).withSeparator( ',' ).build())
 		{
 			writer.writeAll( pairing.getResult().toCsv() );
 		}
