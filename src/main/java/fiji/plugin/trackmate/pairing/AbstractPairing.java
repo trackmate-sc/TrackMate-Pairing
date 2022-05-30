@@ -115,7 +115,7 @@ public abstract class AbstractPairing implements Algorithm
 		return model;
 	}
 
-	protected static final Collection< SpotPair > commonSpots( final Set< Spot > track1, final Set< Spot > track2, final double maxDist )
+	public static final Collection< SpotPair > commonSpots( final Set< Spot > track1, final Set< Spot > track2, final double maxDist )
 	{
 		final Collection< SpotPair > commons = new ArrayList<>();
 		for ( final Spot s1 : track1 )
