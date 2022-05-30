@@ -19,6 +19,8 @@ public interface PairingMethod
 	 *            the first model.
 	 * @param model2
 	 *            the second model.
+	 * @param maxPairingDistance
+	 *            the distance beyond which to reject pairing.
 	 * @return a builder that can generating a pairing results. The builder will
 	 *         have the pairing results ready and can be decorated with
 	 *         supplemental data.

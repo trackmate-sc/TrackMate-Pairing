@@ -108,11 +108,11 @@ public class PairingTrackMate extends AbstractPairing implements OutputAlgorithm
 	}
 
 	/**
-	 * Tries to determine from the settings stored in the specified model, in
-	 * what channel the detection happened.
+	 * Tries to determine from the settings in what channel the detection
+	 * happened.
 	 * 
-	 * @param model
-	 *            the model to investigate.
+	 * @param settings
+	 *            the settings to investigate.
 	 * @return the channel in which the detection happened, or 0 if nothing can
 	 *         be found.
 	 */
