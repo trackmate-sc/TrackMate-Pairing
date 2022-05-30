@@ -31,7 +31,7 @@ public class AverageTrackPositionPairing implements PairingMethod
 {
 
 	@Override
-	public Pairing pair( final Model model1, final Model model2, final double maxPairingDistance, final String sourceImagePath )
+	public Builder pair( final Model model1, final Model model2, final double maxPairingDistance )
 	{
 		final Builder builder = Pairing.build().units( model1.getSpaceUnits() );
 
@@ -103,10 +103,7 @@ public class AverageTrackPositionPairing implements PairingMethod
 			builder.unmatchedTrack2( id2, track2 );
 		}
 
-		// Add the path to the source image.
-		builder.sourceImagePath( sourceImagePath );
-
-		return builder.get();
+		return builder;
 	}
 
 	protected RealLocalizable trackPosition( final Collection< Spot > track )

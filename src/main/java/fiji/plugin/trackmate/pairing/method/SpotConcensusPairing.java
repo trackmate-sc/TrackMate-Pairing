@@ -27,7 +27,7 @@ public class SpotConcensusPairing implements PairingMethod
 {
 
 	@Override
-	public Pairing pair( final Model model1, final Model model2, final double maxPairingDistance, final String sourceImagePath )
+	public Builder pair( final Model model1, final Model model2, final double maxPairingDistance )
 	{
 		final TrackModel tm1 = model1.getTrackModel();
 		final TrackModel tm2 = model2.getTrackModel();
@@ -76,9 +76,6 @@ public class SpotConcensusPairing implements PairingMethod
 			builder.unmatchedTrack2( id2, track2 );
 		}
 
-		// Add the path to the source image.
-		builder.sourceImagePath( sourceImagePath );
-
-		return builder.get();
+		return builder;
 	}
 }
