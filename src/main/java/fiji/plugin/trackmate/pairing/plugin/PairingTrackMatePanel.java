@@ -42,15 +42,18 @@ import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.text.JTextComponent;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.scijava.prefs.PrefService;
 import org.scijava.util.VersionUtils;
+
+import com.itextpdf.text.Font;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.gui.Fonts;
@@ -68,9 +71,9 @@ public class PairingTrackMatePanel extends JPanel
 
 	private final PrefService prefService;
 
-	final JTextField tf1;
+	final JTextArea tf1;
 
-	final JTextField tf2;
+	final JTextArea tf2;
 
 	final JButton btnPair;
 
@@ -89,7 +92,7 @@ public class PairingTrackMatePanel extends JPanel
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 45, 0, 45, 0, 45, 45, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 30, 45, 65, 45, 65, 45, 45, 30, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 0.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
@@ -99,7 +102,7 @@ public class PairingTrackMatePanel extends JPanel
 		lblTitle.setHorizontalAlignment( SwingConstants.CENTER );
 		final GridBagConstraints gbcLblTitle = new GridBagConstraints();
 		gbcLblTitle.gridwidth = 3;
-		gbcLblTitle.insets = new Insets( 5, 5, 5, 0 );
+		gbcLblTitle.insets = new Insets( 5, 5, 5, 5 );
 		gbcLblTitle.fill = GridBagConstraints.HORIZONTAL;
 		gbcLblTitle.gridx = 0;
 		gbcLblTitle.gridy = 0;
@@ -118,17 +121,20 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcBtnBrowse1 = new GridBagConstraints();
 		gbcBtnBrowse1.gridwidth = 2;
 		gbcBtnBrowse1.anchor = GridBagConstraints.SOUTHEAST;
-		gbcBtnBrowse1.insets = new Insets( 5, 5, 5, 0 );
+		gbcBtnBrowse1.insets = new Insets( 5, 5, 5, 5 );
 		gbcBtnBrowse1.gridx = 1;
 		gbcBtnBrowse1.gridy = 2;
 		add( btnBrowse1, gbcBtnBrowse1 );
 
-		tf1 = new JTextField();
+		tf1 = new JTextArea();
+		tf1.setEditable( false );
+		tf1.setLineWrap( true );
+		tf1.setFont( tf1.getFont().deriveFont( Font.ITALIC ) );
 		tf1.setText( prefService.get( PairingTrackMate.class, "Path1", System.getProperty( "user.home" ) ) );
 		final GridBagConstraints gbcTf1 = new GridBagConstraints();
 		gbcTf1.gridwidth = 3;
-		gbcTf1.insets = new Insets( 0, 5, 5, 0 );
-		gbcTf1.fill = GridBagConstraints.HORIZONTAL;
+		gbcTf1.insets = new Insets( 5, 5, 5, 5 );
+		gbcTf1.fill = GridBagConstraints.BOTH;
 		gbcTf1.gridx = 0;
 		gbcTf1.gridy = 3;
 		add( tf1, gbcTf1 );
@@ -147,17 +153,20 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcBtnBrowse2 = new GridBagConstraints();
 		gbcBtnBrowse2.gridwidth = 2;
 		gbcBtnBrowse2.anchor = GridBagConstraints.SOUTHEAST;
-		gbcBtnBrowse2.insets = new Insets( 5, 5, 5, 0 );
+		gbcBtnBrowse2.insets = new Insets( 5, 5, 5, 5 );
 		gbcBtnBrowse2.gridx = 1;
 		gbcBtnBrowse2.gridy = 4;
 		add( btnBrowse2, gbcBtnBrowse2 );
 
-		tf2 = new JTextField();
+		tf2 = new JTextArea();
+		tf2.setEditable( false );
+		tf2.setLineWrap( true );
+		tf2.setFont( tf2.getFont().deriveFont( Font.ITALIC ) );
 		tf2.setText( prefService.get( PairingTrackMate.class, "Path2", System.getProperty( "user.home" ) ) );
 		final GridBagConstraints gbcTf2 = new GridBagConstraints();
-		gbcTf2.insets = new Insets( 0, 5, 5, 0 );
+		gbcTf2.insets = new Insets( 5, 5, 5, 5 );
 		gbcTf2.gridwidth = 3;
-		gbcTf2.fill = GridBagConstraints.HORIZONTAL;
+		gbcTf2.fill = GridBagConstraints.BOTH;
 		gbcTf2.gridx = 0;
 		gbcTf2.gridy = 5;
 		add( tf2, gbcTf2 );
@@ -185,7 +194,7 @@ public class PairingTrackMatePanel extends JPanel
 		lblUnits = new JLabel( "pixels" );
 		final GridBagConstraints gbc_lblUnits = new GridBagConstraints();
 		gbc_lblUnits.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblUnits.insets = new Insets( 5, 0, 5, 0 );
+		gbc_lblUnits.insets = new Insets( 5, 5, 5, 5 );
 		gbc_lblUnits.gridx = 2;
 		gbc_lblUnits.gridy = 6;
 		add( lblUnits, gbc_lblUnits );
@@ -193,7 +202,7 @@ public class PairingTrackMatePanel extends JPanel
 		final JLabel lblPairingMethod = new JLabel( "Pairing method:" );
 		final GridBagConstraints gbcLblPairingMethod = new GridBagConstraints();
 		gbcLblPairingMethod.anchor = GridBagConstraints.EAST;
-		gbcLblPairingMethod.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblPairingMethod.insets = new Insets( 5, 5, 5, 5 );
 		gbcLblPairingMethod.gridx = 0;
 		gbcLblPairingMethod.gridy = 7;
 		add( lblPairingMethod, gbcLblPairingMethod );
@@ -202,7 +211,8 @@ public class PairingTrackMatePanel extends JPanel
 				new Vector<>( Arrays.asList( PairingMethods.values() ) ) );
 		cmbboxPairingMethod.setSelectedIndex( prefService.getInt( PairingTrackMate.class, "PairingMethod", 0 ) );
 		final GridBagConstraints gbcCmbboxPairingMethod = new GridBagConstraints();
-		gbcCmbboxPairingMethod.insets = new Insets( 0, 0, 5, 5 );
+		gbcCmbboxPairingMethod.gridwidth = 2;
+		gbcCmbboxPairingMethod.insets = new Insets( 5, 5, 5, 5 );
 		gbcCmbboxPairingMethod.fill = GridBagConstraints.HORIZONTAL;
 		gbcCmbboxPairingMethod.gridx = 1;
 		gbcCmbboxPairingMethod.gridy = 7;
@@ -213,7 +223,7 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcPanelButtons = new GridBagConstraints();
 		gbcPanelButtons.anchor = GridBagConstraints.SOUTH;
 		gbcPanelButtons.gridwidth = 3;
-		gbcPanelButtons.insets = new Insets( 5, 5, 0, 0 );
+		gbcPanelButtons.insets = new Insets( 5, 5, 5, 5 );
 		gbcPanelButtons.fill = GridBagConstraints.HORIZONTAL;
 		gbcPanelButtons.gridx = 0;
 		gbcPanelButtons.gridy = 9;
@@ -236,13 +246,33 @@ public class PairingTrackMatePanel extends JPanel
 		btnBrowse2.addActionListener( e -> browse( tf2, "Path2" ) );
 
 		// Persistence & physical units.
-		tf1.addActionListener( e -> {
-			prefService.put( PairingTrackMate.class, "Path1", tf1.getText() );
-			updateMaxDistanceField();
+		tf1.addFocusListener( new FocusListener()
+		{
+
+			@Override
+			public void focusLost( final FocusEvent e )
+			{
+				prefService.put( PairingTrackMate.class, "Path1", tf1.getText() );
+				updateMaxDistanceField();
+			}
+
+			@Override
+			public void focusGained( final FocusEvent e )
+			{}
 		} );
-		tf2.addActionListener( e -> {
-			prefService.put( PairingTrackMate.class, "Path2", tf2.getText() );
-			updateMaxDistanceField();
+		tf2.addFocusListener( new FocusListener()
+		{
+
+			@Override
+			public void focusLost( final FocusEvent e )
+			{
+				prefService.put( PairingTrackMate.class, "Path2", tf2.getText() );
+				updateMaxDistanceField();
+			}
+
+			@Override
+			public void focusGained( final FocusEvent e )
+			{}
 		} );
 		ftfMaxDist.addActionListener( e -> updateMaxDistanceField() );
 		ftfMaxDist.addFocusListener( new FocusListener()
@@ -314,7 +344,7 @@ public class PairingTrackMatePanel extends JPanel
 		return null;
 	}
 
-	private void browse( final JTextField tf, final String persistanceKey )
+	private void browse( final JTextComponent tf, final String persistanceKey )
 	{
 		final File file = new File( tf.getText() );
 		final File tmpFile = IOUtils.askForFileForLoading( file, "Specify a TrackMate XML file",
