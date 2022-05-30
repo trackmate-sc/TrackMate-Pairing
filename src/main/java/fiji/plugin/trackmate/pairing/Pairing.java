@@ -22,6 +22,7 @@
 package fiji.plugin.trackmate.pairing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 
 /**
  * Results of the pairing of two TrackMate models.
@@ -106,25 +108,57 @@ public class Pairing
 
 	private final String sourceImagePath;
 
+	private final int ch1;
+
+	private final int ch2;
+
 	private Pairing(
 			final Collection< TrackPair > pairs,
 			final Map< Integer, Collection< Spot > > unmatchedTracks1,
 			final Map< Integer, Collection< Spot > > unmatchedTracks2,
 			final String units,
-			final String sourceImagePath )
+			final String sourceImagePath,
+			final int ch1,
+			final int ch2 )
 	{
 		this.pairs = pairs;
 		this.unmatchedTracks1 = unmatchedTracks1;
 		this.unmatchedTracks2 = unmatchedTracks2;
 		this.units = units;
 		this.sourceImagePath = sourceImagePath;
+		this.ch1 = ch1;
+		this.ch2 = ch2;
 	}
 
 	public List< String[] > toCsv()
 	{
+		/*
+		 * Define supplemental features to add. We specify them as a map of the
+		 * header for that column vs the pair of feature keys, one for spot1,
+		 * one for spot2.
+		 */
+		final SupplementalFeatures supFeatures = new SupplementalFeaturesBuilder()
+				.addFeature( "Mean_intensity_Spot_1", "MEAN_INTENSITY_CH" + ch1, true )
+				.addFeature( "Mean_intensity_Spot_2", "MEAN_INTENSITY_CH" + ch2, false )
+				.addFeature( "Max_intensity_Spot_1", "MAX_INTENSITY_CH" + ch1, true )
+				.addFeature( "Max_intensity_Spot_2", "MAX_INTENSITY_CH" + ch2, false )
+				.addFeature( "Std_intensity_Spot_1", "STD_INTENSITY_CH" + ch1, true )
+				.addFeature( "Std_intensity_Spot_2", "STD_INTENSITY_CH" + ch2, false )
+				.addFeature( "SNR_Spot_1", SpotContrastAndSNRAnalyzerFactory.SNR + ch1, true )
+				.addFeature( "SNR_Spot_2", SpotContrastAndSNRAnalyzerFactory.SNR + ch2, false )
+				.addFeature( "Contrast_Spot_1", SpotContrastAndSNRAnalyzerFactory.CONTRAST + ch1, true )
+				.addFeature( "Contrast_Spot_2", SpotContrastAndSNRAnalyzerFactory.CONTRAST + ch2, false )
+				.get();
+
+		/*
+		 * Generate the list of string arrays to export to CSV.
+		 */
+
 		final List< String[] > strs = new ArrayList<>();
+
 		// Header.
-		final String[] header = new String[] {
+		final List< String > header = new ArrayList<>();
+		final List< String > mainHeader = Arrays.asList(
 				"Track_pair",
 				"Track_1_id",
 				"Track_1_id",
@@ -136,14 +170,17 @@ public class Pairing
 				"Spot_2_Y",
 				"Spot_2_Z",
 				"Distance",
-				"Source_Image"
-		};
-		strs.add( header );
+				"Source_Image" );
+		header.addAll( mainHeader );
+		header.addAll( supFeatures.headers() );
+		strs.add( header.toArray( new String[] {} ) );
+
 		for ( final TrackPair trackPair : pairs )
 		{
 			for ( final SpotPair pair : trackPair.paired )
 			{
-				final String[] str = new String[] {
+				final List< String > str = new ArrayList<>();
+				final List< String > mainValues = Arrays.asList(
 						trackPair.getName(),
 						trackPair.id1.toString(),
 						trackPair.id2.toString(),
@@ -155,9 +192,10 @@ public class Pairing
 						Double.toString( pair.s2.getDoublePosition( 1 ) ),
 						Double.toString( pair.s2.getDoublePosition( 2 ) ),
 						Double.toString( pair.distance() ),
-						sourceImagePath
-				};
-				strs.add( str );
+						sourceImagePath );
+				str.addAll( mainValues );
+				str.addAll( supFeatures.toStrValues( pair.s1, pair.s2 ) );
+				strs.add( str.toArray( new String[] {} ) );
 			}
 		}
 		return strs;
@@ -201,6 +239,9 @@ public class Pairing
 			for ( final Integer id2 : unmatchedTracks2.keySet() )
 				str.append( "\n - " + id2 );
 		}
+		str.append( "\nTarget channel for the first model: " + ch1 );
+		str.append( "\nTarget channel for the second model: " + ch2 );
+		str.append( "\nSource image file: " + sourceImagePath );
 		return str.toString();
 	}
 
@@ -224,6 +265,10 @@ public class Pairing
 		private String units = "";
 
 		private String sourceImagePath;
+
+		private int ch1;
+
+		private int ch2;
 
 		public Builder units( final String units )
 		{
@@ -265,6 +310,18 @@ public class Pairing
 			return this;
 		}
 
+		public Builder targetChannel1( final int ch1 )
+		{
+			this.ch1 = ch1;
+			return this;
+		}
+
+		public Builder targetChannel2( final int ch2 )
+		{
+			this.ch2 = ch2;
+			return this;
+		}
+
 		public Pairing get()
 		{
 			return new Pairing(
@@ -272,7 +329,78 @@ public class Pairing
 					Collections.unmodifiableMap( unmatchedTracks1 ),
 					Collections.unmodifiableMap( unmatchedTracks2 ),
 					units,
-					sourceImagePath );
+					sourceImagePath,
+					ch1,
+					ch2 );
+		}
+	}
+
+	/**
+	 * Utility to declare a collection of features to be extracted from the
+	 * first or second spot of the pair, and added to the CSV export.
+	 */
+	private static class SupplementalFeaturesBuilder
+	{
+
+		private final List< String > headers = new ArrayList<>();
+
+		private final List< String > keys = new ArrayList<>();
+
+		private final List< Boolean > firstSpots = new ArrayList<>();
+
+		public SupplementalFeaturesBuilder addFeature( final String header, final String key, final boolean firstSpot )
+		{
+			headers.add( header );
+			keys.add( key );
+			firstSpots.add( firstSpot );
+			return this;
+		}
+		
+		public SupplementalFeatures get()
+		{
+			return new SupplementalFeatures( headers, keys, firstSpots );
+		}
+	}
+
+	private static class SupplementalFeatures
+	{
+
+		private final List< String > headers;
+
+		private final List< String > keys;
+
+		private final List< Boolean > firstSpots;
+
+		public SupplementalFeatures( final List< String > headers, final List< String > keys, final List< Boolean > firstSpot )
+		{
+			this.headers = headers;
+			this.keys = keys;
+			this.firstSpots = firstSpot;
+		}
+
+		public List< String > headers()
+		{
+			return Collections.unmodifiableList( headers );
+		}
+
+		public List< String > toStrValues( final Spot spot1, final Spot spot2 )
+		{
+			final int n = headers.size();
+			final List< String > out = new ArrayList<>( n );
+			for ( int i = 0; i < n; i++ )
+			{
+				final String key = keys.get( i );
+				final Boolean b = firstSpots.get( i );
+				final Double obj = b.booleanValue()
+						? spot1.getFeature( key )
+						: spot2.getFeature( key );
+
+				if ( obj == null )
+					out.add( Double.toString( Double.NaN ) );
+				else
+					out.add( Double.toString( obj.doubleValue() ) );
+			}
+			return out;
 		}
 	}
 }

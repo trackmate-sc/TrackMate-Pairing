@@ -21,7 +21,11 @@
  */
 package fiji.plugin.trackmate.pairing;
 
+import java.util.Map;
+
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.pairing.Pairing.Builder;
 import fiji.plugin.trackmate.pairing.method.PairingMethod;
 import net.imglib2.algorithm.OutputAlgorithm;
@@ -89,6 +93,10 @@ public class PairingTrackMate extends AbstractPairing implements OutputAlgorithm
 		final String sourceImagePath = readImagePath( xml1 );
 		builder.sourceImagePath( sourceImagePath );
 
+		// Add detection channel for first model.
+		builder.targetChannel1( determineDetectionChannel( readSettings( xml1 ) ) );
+		builder.targetChannel2( determineDetectionChannel( readSettings( xml2 ) ) );
+		
 		output = builder.get();
 		return true;
 	}
@@ -97,5 +105,30 @@ public class PairingTrackMate extends AbstractPairing implements OutputAlgorithm
 	public Pairing getResult()
 	{
 		return output;
+	}
+
+	/**
+	 * Tries to determine from the settings stored in the specified model, in
+	 * what channel the detection happened.
+	 * 
+	 * @param model
+	 *            the model to investigate.
+	 * @return the channel in which the detection happened, or 0 if nothing can
+	 *         be found.
+	 */
+	protected static final int determineDetectionChannel( final Settings settings )
+	{
+		if ( settings == null )
+			return DetectorKeys.DEFAULT_TARGET_CHANNEL;
+
+		final Map< String, Object > ds = settings.detectorSettings;
+		if ( ds == null )
+			return DetectorKeys.DEFAULT_TARGET_CHANNEL;
+
+		final Object obj = ds.get( DetectorKeys.KEY_TARGET_CHANNEL );
+		if ( obj == null )
+			return DetectorKeys.DEFAULT_TARGET_CHANNEL;
+
+		return ( ( Number ) obj ).intValue();
 	}
 }

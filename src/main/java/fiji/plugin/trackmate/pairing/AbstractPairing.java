@@ -36,6 +36,7 @@ import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.pairing.Pairing.SpotPair;
@@ -113,6 +114,14 @@ public abstract class AbstractPairing implements Algorithm
 			return null;
 		}
 		return model;
+	}
+
+	protected Settings readSettings( final String path )
+	{
+		final File file = new File( path );
+		final TmXmlReader reader = new TmXmlReader( file );
+		final Settings settings = reader.readSettings( null );
+		return settings;
 	}
 
 	public static final Collection< SpotPair > commonSpots( final Set< Spot > track1, final Set< Spot > track2, final double maxDist )
