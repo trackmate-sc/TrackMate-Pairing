@@ -49,6 +49,8 @@ import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.pairing.PairingCumulativeHistogram;
 import fiji.plugin.trackmate.pairing.PairingPreviewCreator;
 import fiji.plugin.trackmate.pairing.PairingTrackMate;
+import fiji.plugin.trackmate.pairing.method.PairingMethod;
+import fiji.plugin.trackmate.pairing.method.PairingMethods;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
 import ij.IJ;
@@ -73,6 +75,7 @@ public class PairingTrackMateController
 					pair(
 							gui.tf1.getText(),
 							gui.tf2.getText(),
+							( ( PairingMethods ) gui.cmbboxPairingMethod.getSelectedItem() ).method(),
 							( ( Number ) gui.ftfMaxDist.getValue() ).doubleValue() );
 				}
 				finally
@@ -181,14 +184,14 @@ public class PairingTrackMateController
 		frame.setVisible( true );
 	}
 
-	public void pair( final String path1, final String path2, final double maxPairDistance )
+	public void pair( final String path1, final String path2, final PairingMethod method, final double maxPairDistance )
 	{
 		/*
 		 * Pairing.
 		 */
 
 		IJ.log( "Pairing " + path1 + " and " + path2 );
-		final PairingTrackMate pairing = new PairingTrackMate( path1, path2, maxPairDistance );
+		final PairingTrackMate pairing = new PairingTrackMate( path1, path2, method, maxPairDistance );
 		if ( !pairing.checkInput() || !pairing.process() )
 		{
 			IJ.error( "Pairing TrackMate", "Problem pairing the files:\n" + pairing.getErrorMessage() );

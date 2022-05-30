@@ -32,10 +32,13 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -55,6 +58,7 @@ import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.pairing.PairingTrackMate;
+import fiji.plugin.trackmate.pairing.method.PairingMethods;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class PairingTrackMatePanel extends JPanel
@@ -74,6 +78,8 @@ public class PairingTrackMatePanel extends JPanel
 
 	final JFormattedTextField ftfMaxDist;
 
+	final JComboBox< PairingMethods > cmbboxPairingMethod;
+
 	final JLabel lblUnits;
 
 
@@ -83,9 +89,9 @@ public class PairingTrackMatePanel extends JPanel
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 45, 0, 45, 0, 45, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 45, 0, 45, 0, 45, 45, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		setLayout( gridBagLayout );
 
 		final JLabel lblTitle = new JLabel( "Pairing TrackMate v" + VersionUtils.getVersion( PairingTrackMatePanel.class ) );
@@ -112,7 +118,7 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcBtnBrowse1 = new GridBagConstraints();
 		gbcBtnBrowse1.gridwidth = 2;
 		gbcBtnBrowse1.anchor = GridBagConstraints.SOUTHEAST;
-		gbcBtnBrowse1.insets = new Insets( 5, 5, 0, 5 );
+		gbcBtnBrowse1.insets = new Insets( 5, 5, 5, 0 );
 		gbcBtnBrowse1.gridx = 1;
 		gbcBtnBrowse1.gridy = 2;
 		add( btnBrowse1, gbcBtnBrowse1 );
@@ -121,7 +127,7 @@ public class PairingTrackMatePanel extends JPanel
 		tf1.setText( prefService.get( PairingTrackMate.class, "Path1", System.getProperty( "user.home" ) ) );
 		final GridBagConstraints gbcTf1 = new GridBagConstraints();
 		gbcTf1.gridwidth = 3;
-		gbcTf1.insets = new Insets( 0, 5, 5, 5 );
+		gbcTf1.insets = new Insets( 0, 5, 5, 0 );
 		gbcTf1.fill = GridBagConstraints.HORIZONTAL;
 		gbcTf1.gridx = 0;
 		gbcTf1.gridy = 3;
@@ -141,7 +147,7 @@ public class PairingTrackMatePanel extends JPanel
 		final GridBagConstraints gbcBtnBrowse2 = new GridBagConstraints();
 		gbcBtnBrowse2.gridwidth = 2;
 		gbcBtnBrowse2.anchor = GridBagConstraints.SOUTHEAST;
-		gbcBtnBrowse2.insets = new Insets( 5, 5, 0, 5 );
+		gbcBtnBrowse2.insets = new Insets( 5, 5, 5, 0 );
 		gbcBtnBrowse2.gridx = 1;
 		gbcBtnBrowse2.gridy = 4;
 		add( btnBrowse2, gbcBtnBrowse2 );
@@ -149,7 +155,7 @@ public class PairingTrackMatePanel extends JPanel
 		tf2 = new JTextField();
 		tf2.setText( prefService.get( PairingTrackMate.class, "Path2", System.getProperty( "user.home" ) ) );
 		final GridBagConstraints gbcTf2 = new GridBagConstraints();
-		gbcTf2.insets = new Insets( 0, 5, 5, 5 );
+		gbcTf2.insets = new Insets( 0, 5, 5, 0 );
 		gbcTf2.gridwidth = 3;
 		gbcTf2.fill = GridBagConstraints.HORIZONTAL;
 		gbcTf2.gridx = 0;
@@ -157,7 +163,7 @@ public class PairingTrackMatePanel extends JPanel
 		add( tf2, gbcTf2 );
 		tf2.setColumns( 10 );
 
-		final JLabel lblMaxPairingDistance = new JLabel( "MaxPairing Distance:" );
+		final JLabel lblMaxPairingDistance = new JLabel( "Max pairing distance:" );
 		final GridBagConstraints gbcLblMaxPairingDistance = new GridBagConstraints();
 		gbcLblMaxPairingDistance.anchor = GridBagConstraints.EAST;
 		gbcLblMaxPairingDistance.insets = new Insets( 5, 5, 5, 5 );
@@ -179,11 +185,28 @@ public class PairingTrackMatePanel extends JPanel
 		lblUnits = new JLabel( "pixels" );
 		final GridBagConstraints gbc_lblUnits = new GridBagConstraints();
 		gbc_lblUnits.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblUnits.insets = new Insets( 5, 0, 5, 5 );
+		gbc_lblUnits.insets = new Insets( 5, 0, 5, 0 );
 		gbc_lblUnits.gridx = 2;
 		gbc_lblUnits.gridy = 6;
 		add( lblUnits, gbc_lblUnits );
 
+		final JLabel lblPairingMethod = new JLabel( "Pairing method:" );
+		final GridBagConstraints gbcLblPairingMethod = new GridBagConstraints();
+		gbcLblPairingMethod.anchor = GridBagConstraints.EAST;
+		gbcLblPairingMethod.insets = new Insets( 0, 0, 5, 5 );
+		gbcLblPairingMethod.gridx = 0;
+		gbcLblPairingMethod.gridy = 7;
+		add( lblPairingMethod, gbcLblPairingMethod );
+
+		cmbboxPairingMethod = new JComboBox<>(
+				new Vector<>( Arrays.asList( PairingMethods.values() ) ) );
+		cmbboxPairingMethod.setSelectedIndex( prefService.getInt( PairingTrackMate.class, "PairingMethod", 0 ) );
+		final GridBagConstraints gbcCmbboxPairingMethod = new GridBagConstraints();
+		gbcCmbboxPairingMethod.insets = new Insets( 0, 0, 5, 5 );
+		gbcCmbboxPairingMethod.fill = GridBagConstraints.HORIZONTAL;
+		gbcCmbboxPairingMethod.gridx = 1;
+		gbcCmbboxPairingMethod.gridy = 7;
+		add( cmbboxPairingMethod, gbcCmbboxPairingMethod );
 
 		final JPanel panelButtons = new JPanel();
 		panelButtons.setLayout( new BoxLayout( panelButtons, BoxLayout.LINE_AXIS ) );
@@ -193,7 +216,7 @@ public class PairingTrackMatePanel extends JPanel
 		gbcPanelButtons.insets = new Insets( 5, 5, 0, 0 );
 		gbcPanelButtons.fill = GridBagConstraints.HORIZONTAL;
 		gbcPanelButtons.gridx = 0;
-		gbcPanelButtons.gridy = 8;
+		gbcPanelButtons.gridy = 9;
 		add( panelButtons, gbcPanelButtons );
 
 		btnPair = new JButton( "Pair" );
@@ -235,6 +258,13 @@ public class PairingTrackMatePanel extends JPanel
 			public void focusGained( final FocusEvent e )
 			{}
 		} );
+		cmbboxPairingMethod.addItemListener( e -> updatePairingMethod() );
+	}
+
+	private void updatePairingMethod()
+	{
+		prefService.put( PairingTrackMate.class, "PairingMethod",
+				cmbboxPairingMethod.getSelectedIndex() );
 	}
 
 	private void updateMaxDistanceField()

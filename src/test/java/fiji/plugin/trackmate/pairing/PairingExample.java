@@ -31,6 +31,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 
+import fiji.plugin.trackmate.pairing.method.PairingMethod;
+import fiji.plugin.trackmate.pairing.method.SpotConcensusPairing;
 import ij.ImageJ;
 import ij.ImagePlus;
 
@@ -46,7 +48,8 @@ public class PairingExample
 		final String xml2 = "samples/1.5x-timelqpe_2021-04-02_c2.xml";
 
 		System.out.println( "Pairing " + xml1 + " and " + xml2 );
-		final PairingTrackMate pairing = new PairingTrackMate( xml1, xml2, 10. );
+		final PairingMethod method = new SpotConcensusPairing();
+		final PairingTrackMate pairing = new PairingTrackMate( xml1, xml2, method, 10. );
 		if ( !pairing.checkInput() || !pairing.process() )
 		{
 			System.err.println( "Problem pairing the files:" );

@@ -22,7 +22,7 @@
 package fiji.plugin.trackmate.pairing;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.pairing.method.SpotConcensusPairing;
+import fiji.plugin.trackmate.pairing.method.PairingMethod;
 import net.imglib2.algorithm.OutputAlgorithm;
 
 /**
@@ -43,9 +43,12 @@ public class PairingTrackMate extends AbstractPairing implements OutputAlgorithm
 
 	private Pairing output;
 
-	public PairingTrackMate( final String xml1, final String xml2, final double maxPairingDistance )
+	private final PairingMethod method;
+
+	public PairingTrackMate( final String xml1, final String xml2, final PairingMethod method, final double maxPairingDistance )
 	{
 		super( xml1, xml2 );
+		this.method = method;
 		this.maxPairingDistance = maxPairingDistance;
 	}
 
@@ -80,7 +83,6 @@ public class PairingTrackMate extends AbstractPairing implements OutputAlgorithm
 		 */
 
 		final String sourceImagePath = readImagePath( xml1 );
-		final SpotConcensusPairing method = new SpotConcensusPairing();
 		output = method.pair( model1, model2, maxPairingDistance, sourceImagePath );
 		return true;
 	}
