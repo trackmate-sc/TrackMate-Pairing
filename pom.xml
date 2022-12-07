@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>31.1.0</version>
+		<version>33.2.0</version>
 		<relativePath />
 	</parent>
 
@@ -127,7 +127,12 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>TrackMate</artifactId>
-			<version>7.6.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>math.geom2d</groupId>
+			<artifactId>javaGeom</artifactId>
+			<version>0.11.1</version>
 		</dependency>
 
 		<!-- Test -->
@@ -138,9 +143,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>math.geom2d</groupId>
-			<artifactId>javaGeom</artifactId>
-			<version>0.11.1</version>
+			<groupId>sc.fiji</groupId>
+			<artifactId>fiji</artifactId>
+			<scope>test</scope>
 		</dependency>
+
+		
+		
 	</dependencies>
 </project>
