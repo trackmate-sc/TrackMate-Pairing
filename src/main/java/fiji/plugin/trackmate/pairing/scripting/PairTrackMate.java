@@ -65,6 +65,39 @@ public class PairTrackMate
 	{
 		logger.log( "Opening image " + imagePath + '\n' );
 		final ImagePlus imp = IJ.openImage( imagePath );
+		process( imp, settingsCh1, settingsCh2, method, maxPairDistance );
+	}
+
+	/**
+	 * Performs tracking on the image with the specified path, with the tracking
+	 * parameters in the specified settings objects, respectively for the first
+	 * and second channel. The results of both tracking process are saved to two
+	 * TrackMate XML file, in the folder where the image is saved. Then the two
+	 * tracking results are paired, and pairing results are saved in a CSV file
+	 * again in the image folder.
+	 * 
+	 * @param imagePath
+	 * @param settingsCh1
+	 * @param settingsCh2
+	 * @param method
+	 * @param maxPairDistance
+	 */
+	public static final void process(
+			final ImagePlus imp,
+			final Settings settingsCh1,
+			final Settings settingsCh2,
+			final PairingMethod method,
+			final double maxPairDistance )
+	{
+
+		final String directory = imp.getOriginalFileInfo().directory;
+		final String fileName = imp.getOriginalFileInfo().fileName;
+		if ( directory == null || fileName == null )
+		{
+			logger.error( "Image file could not be found on disk. Please save it before processing.\n" );
+			return;
+		}
+		final String imagePath = new File( directory, fileName ).getAbsolutePath();
 
 		/*
 		 * Tracking first channel.
