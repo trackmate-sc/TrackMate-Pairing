@@ -124,14 +124,13 @@ public class PairTrackMate
 		 * Tracking first channel.
 		 */
 
-		final String saveNameCh1;
+		final String savePathCh1;
 		final int idx = imagePath.lastIndexOf( '.' );
 		if ( idx < 0 )
-			saveNameCh1 = imagePath + "-ch1.xml";
+			savePathCh1 = imagePath + "-ch1.xml";
 		else
-			saveNameCh1 = imagePath.substring( 0, idx ) + "-ch1.xml";
+			savePathCh1 = imagePath.substring( 0, idx ) + "-ch1.xml";
 
-		final String savePathCh1 = new File( new File( imagePath ).getParent(), saveNameCh1 ).getAbsolutePath();
 		logger.log( "Performing tracking on channel 1.\n" );
 		final boolean ok1 = track( imp, settingsCh1, savePathCh1 );
 		if ( !ok1 )
@@ -145,14 +144,13 @@ public class PairTrackMate
 		 * Tracking second channel.
 		 */
 
-		final String saveNameCh2;
+		final String savePathCh2;
 		if ( idx < 0 )
-			saveNameCh2 = imagePath + "-ch2.xml";
+			savePathCh2 = imagePath + "-ch2.xml";
 		else
-			saveNameCh2 = imagePath.substring( 0, idx ) + "-ch2.xml";
+			savePathCh2 = imagePath.substring( 0, idx ) + "-ch2.xml";
 
 		logger.log( "Performing tracking on channel 2.\n" );
-		final String savePathCh2 = new File( new File( imagePath ).getParent(), saveNameCh2 ).getAbsolutePath();
 		final boolean ok2 = track( imp, settingsCh2, savePathCh2 );
 		if ( !ok2 )
 		{
@@ -207,9 +205,8 @@ public class PairTrackMate
 	 */
 	public static final String track( final ImagePlus imp, final Settings settings )
 	{
-		final String directory = imp.getOriginalFileInfo().directory;
 		final String fileName = imp.getOriginalFileInfo().fileName;
-		if ( directory == null || fileName == null )
+		if ( fileName == null )
 		{
 			logger.error( "Image file could not be found on disk. Please save it before processing.\n" );
 			return null;
@@ -222,7 +219,7 @@ public class PairTrackMate
 		else
 			saveName = fileName.substring( 0, idx ) + ".xml";
 
-		final String savePath = new File( directory, saveName ).getAbsolutePath();
+		final String savePath = new File( saveName ).getAbsolutePath();
 		track( imp, settings, savePath );
 		return savePath;
 	}
@@ -245,7 +242,7 @@ public class PairTrackMate
 		}
 
 		// Save results.
-		final TmXmlWriter writer = new TmXmlWriter( new File( targetFile ), Logger.IJ_LOGGER );
+		final TmXmlWriter writer = new TmXmlWriter( new File( targetFile ), Logger.VOID_LOGGER );
 		writer.appendLog( LOG_MESSAGE + "\n" + TMUtils.getCurrentTimeString() );
 		writer.appendModel( trackmate.getModel() );
 		writer.appendSettings( trackmate.getSettings() );
@@ -282,7 +279,9 @@ public class PairTrackMate
 		final Path parent = Paths.get( path1 ).getParent();
 		final String filename1 = Paths.get( path1 ).getFileName().toString();
 		final String filename2 = Paths.get( path2 ).getFileName().toString();
-		final String prefix = PairingTrackMateController.longestCommonPrefix( filename1, filename2 );
+		String prefix = PairingTrackMateController.longestCommonPrefix( filename1, filename2 );
+		if (prefix.endsWith( "-ch" ))
+			prefix = prefix.substring( 0, prefix.length() - 3 );
 		final File csvFile = Paths.get( parent.toString(), prefix + ".csv" ).toFile();
 
 		// Save to CSV.
