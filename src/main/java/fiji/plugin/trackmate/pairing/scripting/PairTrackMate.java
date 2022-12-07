@@ -90,14 +90,14 @@ public class PairTrackMate
 	}
 
 	/**
-	 * Performs tracking on the image with the specified path, with the tracking
-	 * parameters in the specified settings objects, respectively for the first
-	 * and second channel. The results of both tracking process are saved to two
-	 * TrackMate XML file, in the folder where the image is saved. Then the two
-	 * tracking results are paired, and pairing results are saved in a CSV file
-	 * again in the image folder.
+	 * Performs tracking on the specified image, with the tracking parameters in
+	 * the specified settings objects, respectively for the first and second
+	 * channel. The results of both tracking process are saved to two TrackMate
+	 * XML file, in the folder where the image is saved. Then the two tracking
+	 * results are paired, and pairing results are saved in a CSV file again in
+	 * the image folder.
 	 * 
-	 * @param imagePath
+	 * @param imp
 	 * @param settingsCh1
 	 * @param settingsCh2
 	 * @param method
