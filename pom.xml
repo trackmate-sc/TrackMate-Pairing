@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>Pairing-TrackMate</artifactId>
-	<version>1.5.2-SNAPSHOT</version>
+	<version>1.5.3-SNAPSHOT</version>
 
 	<name>Pairing-TrackMate</name>
 	<description>A Fiji plugin to pair two TrackMate files and extract statistics from pairs.</description>
