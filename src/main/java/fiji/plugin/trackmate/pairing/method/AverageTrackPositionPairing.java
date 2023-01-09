@@ -109,7 +109,8 @@ public class AverageTrackPositionPairing implements PairingMethod
 				final Set< Spot > track2 = tm2.trackSpots( bestMatch );
 
 				final Collection< SpotPair > bestCommons = AbstractPairing.commonSpots( track1, track2, maxPairingDistance );
-				builder.pair( id1, bestMatch, bestCommons );
+				if ( !bestCommons.isEmpty() )
+					builder.pair( id1, bestMatch, bestCommons );
 			}
 			else
 			{
