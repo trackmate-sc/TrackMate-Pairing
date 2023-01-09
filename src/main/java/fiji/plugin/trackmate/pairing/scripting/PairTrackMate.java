@@ -76,17 +76,19 @@ public class PairTrackMate
 	 * @param settingsCh2
 	 * @param method
 	 * @param maxPairDistance
+	 * @param trackmateFileSubFolder
 	 */
 	public static final void process(
 			final String imagePath,
 			final Settings settingsCh1,
 			final Settings settingsCh2,
 			final PairingMethod method,
-			final double maxPairDistance )
+			final double maxPairDistance,
+			final String trackmateFileSubFolder )
 	{
 		logger.log( "Opening image " + imagePath + '\n' );
 		final ImagePlus imp = IJ.openImage( imagePath );
-		process( imp, settingsCh1, settingsCh2, method, maxPairDistance );
+		process( imp, settingsCh1, settingsCh2, method, maxPairDistance, trackmateFileSubFolder );
 	}
 
 	/**
@@ -102,13 +104,17 @@ public class PairTrackMate
 	 * @param settingsCh2
 	 * @param method
 	 * @param maxPairDistance
+	 * @param trackmateFileSubFolder
+	 *            the name of a subfolder in which the TrackMate files will be
+	 *            saved.
 	 */
 	public static final void process(
 			final ImagePlus imp,
 			final Settings settingsCh1,
 			final Settings settingsCh2,
 			final PairingMethod method,
-			final double maxPairDistance )
+			final double maxPairDistance,
+			final String trackmateFileSubFolder )
 	{
 
 		final String directory = imp.getOriginalFileInfo().directory;
@@ -118,19 +124,23 @@ public class PairTrackMate
 			logger.error( "Image file could not be found on disk. Please save it before processing.\n" );
 			return;
 		}
-		final String imagePath = new File( directory, fileName ).getAbsolutePath();
+		final String savePathCh1;
+		final String savePathCh2;
+		final int idx = fileName.lastIndexOf( '.' );
+		if ( idx < 0 )
+		{
+			savePathCh1 = Paths.get( directory, trackmateFileSubFolder, fileName + "-ch1.xml" ).toString();
+			savePathCh2 = Paths.get( directory, trackmateFileSubFolder, fileName + "-ch2.xml" ).toString();
+		}
+		else
+		{
+			savePathCh1 = Paths.get( directory, trackmateFileSubFolder, fileName.substring( 0, idx ) + "-ch1.xml").toString();
+			savePathCh2 = Paths.get( directory, trackmateFileSubFolder, fileName.substring( 0, idx ) + "-ch2.xml" ).toString();
+		}
 
 		/*
 		 * Tracking first channel.
 		 */
-
-		final String savePathCh1;
-		final int idx = imagePath.lastIndexOf( '.' );
-		if ( idx < 0 )
-			savePathCh1 = imagePath + "-ch1.xml";
-		else
-			savePathCh1 = imagePath.substring( 0, idx ) + "-ch1.xml";
-
 		logger.log( "Performing tracking on channel 1.\n" );
 		final boolean ok1 = track( imp, settingsCh1, savePathCh1 );
 		if ( !ok1 )
@@ -143,13 +153,6 @@ public class PairTrackMate
 		/*
 		 * Tracking second channel.
 		 */
-
-		final String savePathCh2;
-		if ( idx < 0 )
-			savePathCh2 = imagePath + "-ch2.xml";
-		else
-			savePathCh2 = imagePath.substring( 0, idx ) + "-ch2.xml";
-
 		logger.log( "Performing tracking on channel 2.\n" );
 		final boolean ok2 = track( imp, settingsCh2, savePathCh2 );
 		if ( !ok2 )
