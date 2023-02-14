@@ -100,5 +100,10 @@ for im_file in os.listdir(source_folder):
 	print(' - Executing tracking and pairing.')
 	PairTrackMate.process(imp, settings_ch1, settings_ch2, method, max_pair_distance, trackmate_sub_folder)
 	print(' - Done.')
+	
+	# Force closing the image.
+	imp.flush()
+	imp.changes = false
+	imp.close()
 
 print('\nFinished batch pairing in folder %s' % source_folder)
